@@ -1,0 +1,116 @@
+$newbeeColor:#1baeae;
+
+.newbee_login {
+  width: 100%;
+  height: 100%;
+  font-weight: 500;
+
+  .login_body {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff;
+
+    // 登录表单
+    .login_form {
+      width: 420px;
+      height: 500px;
+      background-color: #fff;
+      border-radius: 4px;
+      box-shadow: 0 21px 41px 0 rgba(0, 0, 0, 0.2);
+
+      .el-form-item {
+        margin-bottom: 12px;
+      }
+
+      .head {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 0 20px 0;
+
+        &>img {
+          width: 100px;
+          height: 100px;
+          margin-right: 20px;
+        }
+
+        .title {
+          &>div:nth-child(1) {
+            font-size: 28px;
+            color: #1baeae;
+            font-weight: 700;
+          }
+
+          &>div:nth-child(2) {
+            font-size: 12px;
+            color: #999;
+          }
+        }
+      }
+
+      /deep/ .el-form {
+        width: 70%;
+        margin: 0 auto;
+
+        .el-input__inner:focus {
+          outline: 0;
+          border-color: $newbeeColor;
+        }
+
+        .el-form-item.is-error .el-input__inner:focus {
+          border-color: #f56c6c;
+        }
+
+        .el-form-item__content {
+          text-align: left;
+
+          &>div:first-child {
+            color: rgb(51, 51, 51);
+          }
+
+          a {
+            color: #409eff;
+            text-decoration: none;
+          }
+
+          .el-button {
+            width: 100%;
+            background-color: $newbeeColor;
+            border-color: $newbeeColor;
+            color: #fff;
+
+            span {
+              font-weight: 500;
+            }
+
+            &:hover {
+              background: #49bebe;
+              border-color: #49bebe;
+              color: #fff;
+            }
+          }
+
+          .el-checkbox__input {
+            .el-checkbox__inner {
+              border-color: $newbeeColor;
+            }
+          }
+
+          .el-checkbox__input.is-checked {
+            &+.el-checkbox__label {
+              color: $newbeeColor;
+            }
+
+            .el-checkbox__inner {
+              background-color: $newbeeColor;
+              border-color: $newbeeColor;
+            }
+          }
+        }
+      }
+    }
+  }
+}
