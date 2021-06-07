@@ -1,6 +1,5 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import axios from 'axios';
 import ElementUI from 'element-ui';
 
 Vue.use(ElementUI);

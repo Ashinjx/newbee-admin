@@ -1,0 +1,94 @@
+$newbeeColor:#1baeae;
+
+// 商品添加/修改页
+.myGoods {
+  display: flex;
+  width: 100%;
+  height: 100%;
+
+  //卡片背景
+  /deep/ .el-card {
+    flex: 1;
+    height: 100%;
+    overflow: auto;
+
+    //表单中每一个元素的主体
+    .el-form-item__content {
+      text-align: left;
+
+      .el-select {
+        .el-input.is-focus .el-input__inner {
+          border-color: $newbeeColor;
+        }
+      }
+
+      //输入框,多行文本域
+      .el-input,
+      .el-textarea {
+        width: 300px;
+
+        //输入框聚焦
+        .el-input__inner:focus,
+        .el-textarea__inner:focus {
+          border-color: $newbeeColor;
+        }
+      }
+
+      //单选按钮
+      .el-radio__inner {
+        &:hover {
+          border-color: $newbeeColor;
+        }
+      }
+
+      //单选按钮
+      .el-radio__input {
+        &.is-checked {
+          .el-radio__inner {
+            border-color: $newbeeColor;
+            background-color: $newbeeColor;
+          }
+
+          &+.el-radio__label {
+            color: $newbeeColor;
+          }
+        }
+
+      }
+
+      //图片上传
+      .avatar-uploader {
+        width: 100px;
+        height: 100px;
+        color: #ddd;
+        font-size: 30px;
+
+        .el-upload:focus {
+          border-color: $newbeeColor;
+          color: $newbeeColor;
+        }
+
+        //图片上传icon
+        .avatar-uploader-icon {
+          display: block;
+          width: 100px;
+          height: 100px;
+          border: 1px solid #e9e9e9;
+          padding: 32px 17px;
+        }
+      }
+    }
+
+    //按钮
+    .el-button {
+      background-color: $newbeeColor;
+      border-color: $newbeeColor;
+
+      &:hover {
+        background: #49bebe;
+        border-color: #49bebe;
+        color: #fff;
+      }
+    }
+  }
+}

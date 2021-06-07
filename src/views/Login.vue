@@ -10,17 +10,17 @@
           </div>
         </div>
         <!-- 登录表单 -->
-        <el-form :model="login_form" :rules="rules">
+        <el-form :model="login_form" :rules="rules" ref="login_form">
           <el-form-item label="账号" prop="account">
-            <el-input v-model="login_form.account" @keyup.enter.native="login"></el-input>
+            <el-input v-model="login_form.account" @keyup.enter.native="login('login_form')"></el-input>
           </el-form-item>
           <el-form-item label="密码" prop="password">
-            <el-input type="password" v-model="login_form.password" @keyup.enter.native="login"></el-input>
+            <el-input type="password" v-model="login_form.password" @keyup.enter.native="login('login_form')"></el-input>
           </el-form-item>
           <el-form-item>
             <div>登录表示您已同意<a>《服务条款》</a></div>
-            <el-button type="primary" @click="login">立即登录</el-button>
-            <el-checkbox v-model="checked" :checked="checked">下次自动登录</el-checkbox>
+            <el-button type="primary" @click="login('login_form')">立即登录</el-button>
+            <el-checkbox v-model="checked" :checked="checked">记住密码</el-checkbox>
           </el-form-item>
         </el-form>
       </div>
@@ -31,8 +31,7 @@
 @import './sass/login.scss';
 </style>
 <script>
-//引入vuex中Mutations
-import { mapMutations } from 'vuex';
+import jwtDecode from 'jwt-decode';
 export default {
   data() {
     return {
@@ -53,27 +52,49 @@ export default {
         ],
       },
       // 是否选中
-      checked: true,
+      checked: '',
     };
   },
+  mounted() {
+    this.getUserInfo();
+  },
   methods: {
-    // 从vuex的Mutations中解构出修改信息的方法
-    ...mapMutations(['setAid', 'setAccount', 'setNickname']),
-    login() {
-      //发送axios请求
-      this.axios.post('/login', `account=${this.login_form.account}&password=${this.login_form.password}`).then((result) => {
-        console.log(result.data);
-        if (result.data.code == 200) {
-          this.$message.success('登录成功');
-          //登录成功则修改vuex中关于用户信息的变量
-          this.setAid(result.data.aid);
-          this.setAccount(result.data.account);
-          this.setNickname(result.data.nickname);
-          // 跳转主页
-          this.$router.push(`/admin/dashboard`);
+    //读取cookie中登录信息
+    getUserInfo() {
+      var user = JSON.parse(localStorage.getItem('userInfo'));
+      console.log(user.checked);
+      if (user.checked == true) {
+        this.login_form.account = user.account;
+        this.login_form.password = user.password;
+        this.checked = true;
+      }
+      if (user.checked == false) {
+        this.checked = false;
+      }
+    },
+    //登录
+    login(login_form) {
+      //验证表单规则
+      this.$refs[login_form].validate((valid) => {
+        if (valid) {
+          //发送axios请求
+          this.axios.post('/login', `account=${this.login_form.account}&password=${this.login_form.password}`).then((result) => {
+            if (result.data.code == 200) {
+              this.$message.success('登录成功');
+              //登录成功保存信息至Session
+              const userObj = jwtDecode(result.data.token);
+              userObj.checked = this.checked;
+              localStorage.setItem('userInfo', JSON.stringify(userObj));
+              // 跳转主页
+              this.$router.push(`/admin/dashboard`);
+            } else {
+              // 登录失败,弹窗提示
+              this.$message.error('用户名或密码错误');
+            }
+          });
         } else {
-          // 登录失败,弹窗提示
-          this.$message.error('用户名或密码错误');
+          //验证不通过
+          return false;
         }
       });
     },

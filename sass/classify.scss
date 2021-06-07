@@ -1,0 +1,57 @@
+$newbeeColor:#1baeae;
+
+.classify {
+  height: 100%;
+  width: 100%;
+
+  //最外层卡片
+  /deep/ .el-card.is-always-shadow {
+    height: 100%;
+
+    //卡片头部
+    .card-header {
+      text-align: left;
+
+      //卡片头部按钮
+      .el-button--primary {
+        background-color: $newbeeColor;
+        border-color: $newbeeColor;
+
+        &:hover {
+          background: #49bebe;
+          border-color: #49bebe;
+          color: #fff;
+        }
+      }
+
+      .el-button--danger {
+        margin-left: 10px;
+      }
+    }
+
+  }
+
+  /deep/ .el-dialog__wrapper {
+    .el-input__inner:focus {
+      border-color: $newbeeColor;
+    }
+
+    .el-button.off:hover {
+      color: $newbeeColor;
+      border-color: #bbe7e7;
+      background-color: #e8f7f7;
+    }
+
+    .el-button--primary {
+      color: #fff;
+      background-color: $newbeeColor;
+      border-color: $newbeeColor;
+
+      &:hover {
+        background: #49bebe;
+        border-color: #49bebe;
+        color: #fff;
+      }
+    }
+  }
+}

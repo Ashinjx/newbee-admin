@@ -9,19 +9,15 @@
           <span>新蜂后台</span>
         </div>
         <div class="line"></div>
-        <el-menu :router="true" @open="handleOpen" @close="handleClose" background-color="#222832" text-color="#fff" active-text-color="#1baeae">
+        <el-menu :router="true" background-color="#222832" text-color="#fff" active-text-color="#1baeae">
           <el-submenu index="1">
             <template slot="title">
               <span>Dashboard</span>
             </template>
             <el-menu-item-group>
-              <el-menu-item index="/admin/dashboard" @click="dashboard">
+              <el-menu-item index="/admin/dashboard" @click="eidtPath(1)">
                 <i class="el-icon-odometer"></i>
                 数据大盘
-              </el-menu-item>
-              <el-menu-item index="1-2" @click="addGoods">
-                <i class="el-icon-plus"></i>
-                添加商品
               </el-menu-item>
             </el-menu-item-group>
           </el-submenu>
@@ -30,19 +26,19 @@
               <span>首页配置</span>
             </template>
             <el-menu-item-group>
-              <el-menu-item index="2-1" @click="carousel">
+              <el-menu-item index="2-1" @click="eidtPath(4)">
                 <i class="el-icon-picture"></i>
                 轮播图配置
               </el-menu-item>
-              <el-menu-item index="2-2" @click="hotSale">
+              <el-menu-item index="2-2" @click="eidtPath(5)">
                 <i class="el-icon-star-on"></i>
                 热销商品配置
               </el-menu-item>
-              <el-menu-item index="2-3" @click="newGoods">
+              <el-menu-item index="2-3" @click="eidtPath(6)">
                 <i class="el-icon-sell"></i>
                 新品上线配置
               </el-menu-item>
-              <el-menu-item index="2-4" @click="forYou">
+              <el-menu-item index="2-4" @click="eidtPath(7)">
                 <i class="el-icon-thumb"></i>
                 为你推荐配置
               </el-menu-item>
@@ -53,19 +49,19 @@
               <span>模块管理</span>
             </template>
             <el-menu-item-group>
-              <el-menu-item index="3-1" @click="classifyAdmin">
+              <el-menu-item index="/admin/classify" @click="eidtPath(8)">
                 <i class="el-icon-menu"></i>
                 分类管理
               </el-menu-item>
-              <el-menu-item index="3-2" @click="goodsAdmin">
+              <el-menu-item index="/admin/goodsAdmin" @click="eidtPath(9)">
                 <i class="el-icon-goods"></i>
                 商品管理
               </el-menu-item>
-              <el-menu-item index="3-3" @click="userAdmin">
+              <el-menu-item index="3-3" @click="eidtPath(10)">
                 <i class="el-icon-user-solid"></i>
                 用户管理
               </el-menu-item>
-              <el-menu-item index="3-4" @click="orderAdmin">
+              <el-menu-item index="3-4" @click="eidtPath(11)">
                 <i class="el-icon-s-order"></i>
                 订单管理
               </el-menu-item>
@@ -76,7 +72,7 @@
               <span>系统管理</span>
             </template>
             <el-menu-item-group>
-              <el-menu-item index="4-1" @click="update">
+              <el-menu-item index="4-1" @click="eidtPath(12)">
                 <i class="el-icon-lock"></i>
                 修改信息
               </el-menu-item>
@@ -95,13 +91,13 @@
               <template #reference>
                 <div class="author">
                   <i class="icon el-icon-s-custom"></i>
-                  {{ nickname || '游客' }}
+                  {{ user.nickname || '游客' }}
                   <i class="el-icon-caret-bottom"></i>
                 </div>
               </template>
               <div class="nickname">
-                <p>登录名：{{ account || '游客' }}</p>
-                <p>昵称：{{ nickname || '游客' }}</p>
+                <p>登录名：{{ user.account || '游客' }}</p>
+                <p>昵称：{{ user.nickname || '游客' }}</p>
                 <el-tag size="small" effect="dark" class="logout" @click="logout">退出</el-tag>
               </div>
             </el-popover>
@@ -128,55 +124,67 @@
 @import './sass/admin.scss';
 </style>
 <script>
-import { mapState } from 'vuex';
 export default {
   data() {
     return {
       path: '主页',
+      user: JSON.parse(localStorage.getItem('userInfo')),
     };
   },
-  computed: {
-    ...mapState(['aid', 'account', 'nickname']),
+  mounted() {
+    this.pathName();
   },
   methods: {
-    handleOpen(key, keyPath) {
-      // console.log(key, keyPath);
+    //路由跳转后更改title
+    eidtPath(val) {
+      if (val == 1) {
+        this.path = '数据大盘';
+      } else if (val == 2) {
+        this.path = '添加商品';
+      } else if (val == 3) {
+        this.path = '修改商品';
+      } else if (val == 4) {
+        this.path = '轮播图配置';
+      } else if (val == 5) {
+        this.path = '热销商品配置';
+      } else if (val == 6) {
+        this.path = '新品上线配置';
+      } else if (val == 7) {
+        this.path = '为你推荐配置';
+      } else if (val == 8) {
+        this.path = '分类管理';
+      } else if (val == 9) {
+        this.path = '商品管理';
+      } else if (val == 10) {
+        this.path = '用户管理';
+      } else if (val == 11) {
+        this.path = '订单管理';
+      } else if (val == 12) {
+        this.path = '修改管理';
+      }
     },
-    handleClose(key, keyPath) {
-      // console.log(key, keyPath);
-    },
-    dashboard() {
-      this.path = '数据大盘';
-    },
-    addGoods() {
-      this.path = '添加商品';
-    },
-    carousel() {
-      this.path = '轮播图配置';
-    },
-    hotSale() {
-      this.path = '热销商品配置';
-    },
-    newGoods() {
-      this.path = '新品上线配置';
-    },
-    forYou() {
-      this.path = '为你推荐配置';
-    },
-    classifyAdmin() {
-      this.path = '分类管里';
-    },
-    goodsAdmin() {
-      this.path = '商品管理';
-    },
-    userAdmin() {
-      this.path = '用户管理';
-    },
-    orderAdmin() {
-      this.path = '订单管理';
-    },
-    update() {
-      this.path = '修改信息';
+    //刷新页面后保持title
+    pathName() {
+      var endPath = location.hash.split('/');
+      if (endPath[2] == 'dashboard') {
+        this.path = '数据大盘';
+      } else if (endPath[2] == 'addGoods') {
+        this.path = '添加商品';
+      } else if (endPath[2] == 'editGoods') {
+        this.path = '修改商品';
+      } else if (endPath[2] == 'carousel') {
+        this.path = '轮播图配置';
+      } else if (endPath[2] == 'hotSale') {
+        this.path = '热销商品配置';
+      } else if (endPath[2] == 'newGoods') {
+        this.path = '新品上线配置';
+      } else if (endPath[2] == 'forYou') {
+        this.path = '为你推荐配置';
+      } else if (endPath[2] == 'classify') {
+        this.path = '分类管理';
+      } else if (endPath[2] == 'goodsAdmin') {
+        this.path = '商品管理';
+      }
     },
     logout() {
       this.$router.push('/');
