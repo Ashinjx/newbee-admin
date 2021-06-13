@@ -1,11 +1,12 @@
 <template>
-  <div class="goodsAdmin">
+  <div class="userAdmin">
     <!-- 卡片包裹 -->
     <el-card class="box-card">
       <!-- header部分按钮 -->
       <template #header>
         <div class="card-header">
-          <el-button type="primary" size="small" icon="el-icon-plus" @click="toAddGood">新增商品</el-button>
+          <el-button type="primary" size="small" icon="el-icon-plus" @click="relieve(multipleSelection)">解除禁用</el-button>
+          <el-button type="danger" size="small" icon="el-icon-delete" @click="banUser(multipleSelection)">禁用账户</el-button>
         </div>
       </template>
       <!-- 主体表格 -->
@@ -18,32 +19,24 @@
         @sort-change="sortChange"
       >
         <el-table-column type="selection" width="55"> </el-table-column>
-        <el-table-column prop="goodID" label="商品编号" sortable="custom"> </el-table-column>
-        <el-table-column prop="name" label="商品名"> </el-table-column>
-        <el-table-column prop="intr" label="商品简介"> </el-table-column>
-        <el-table-column prop="imageUrl" label="商品主图" width="150px">
+        <el-table-column prop="nickname" label="昵称"> </el-table-column>
+        <el-table-column prop="account" label="登录名"> </el-table-column>
+        <el-table-column prop="status" label="身份状态">
           <template #default="scope">
-            <img style="width: 100px; height: 100px;" :src="scope.row.imageUrl" :key="scope.row.goodId" alt="" />
+            <!-- 判断身份状态为0则显示绿色正常,否则显示红色禁用 -->
+            <span :style="scope.row.status == 0 ? 'color: green' : 'color:red'"> {{ scope.row.status == 0 ? '正常' : '禁用' }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="stock" label="商品库存"> </el-table-column>
-        <el-table-column prop="salePrice" label="商品售价"> </el-table-column>
-        <el-table-column prop="onSale" label="上架状态">
+        <el-table-column prop="isLogout" label="是否注销">
           <template #default="scope">
-            <span style="color: green;" v-if="scope.row.onSale == 0">销售中</span>
-            <span style="color: red;" v-else>已下架</span>
+            <!-- 判断是否注销,isLogout为0则显示绿色正常,否则显示红色禁用 -->
+            <span :style="scope.row.isLogout == 0 ? 'color: green' : 'color:red'"> {{ scope.row.isLogout == 0 ? '正常' : '注销' }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="100">
-          <!-- 操作按钮 修改/上架 -->
-          <template #default="scope">
-            <a style="cursor: pointer; margin-right: 10px;color: #409eff" @click="toEditGood(scope.row)">修改</a>
-            <a style="cursor: pointer; margin-right: 10px;color: #409eff" v-if="scope.row.onSale == 0" @click="handleStatus(scope.row.goodID, 1)">下架</a>
-            <a style="cursor: pointer; margin-right: 10px;color: #409eff" v-else @click="handleStatus(scope.row.goodID, 0)">上架</a>
-          </template>
-        </el-table-column>
+        <!-- 按照注册时间排序 -->
+        <el-table-column prop="regTime" label="注册时间" sortable="custom"> </el-table-column>
       </el-table>
-      <!-- 分页 -->
+      <!-- 分页控制 -->
       <el-pagination background layout="prev, pager, next" :total="total" :page-size="pageSize" :current-page="currentPage" @current-change="currentChange">
       </el-pagination>
     </el-card>
@@ -60,16 +53,19 @@ export default {
       total: 0, //数据总条数
       pageSize: 10, //每页显示
       currentPage: 1, //当前页
+      multipleSelection: [],
     };
   },
   mounted() {
-    //载入商品列表
-    this.getGoods();
+    this.getUsers();
   },
   methods: {
-    //请求表格数据
-    getGoods() {
-      this.axios.get('/getGoods').then((result) => {
+    //获取用户信息放入表格
+    getUsers() {
+      this.axios.get('/getUsers').then((result) => {
+        for (var i = 0; i < result.data.result.length; i++) {
+          result.data.result[i].regTime = this.moment(result.data.result[i].regTime).format('YYYY-MM-DD HH:mm:ss');
+        }
         //存放到表格中
         this.tableData = result.data.result;
         this.total = this.tableData.length;
@@ -96,27 +92,35 @@ export default {
         }
       };
     },
-    //选中行
-    handleSelectionChange() {},
     //控制分页
     currentChange(currentPage) {
       this.currentPage = currentPage;
     },
-    //添加商品
-    toAddGood() {
-      this.$router.push({ path: '/admin/addGoods' });
+    //获取选中列uid
+    handleSelectionChange(val) {
+      this.multipleSelection = [];
+      for (var i = 0; i < val.length; i++) {
+        this.multipleSelection[i] = val[i].uid;
+      }
     },
-    //修改商品
-    toEditGood(row) {
-      this.$router.push({ path: `/admin/editGoods/${row.goodID}` });
-    },
-    //修改上架状态
-    handleStatus(goodID, onSale) {
-      this.axios.put('/editOnsale', `goodID=${goodID}&onSale=${onSale}`).then((result) => {
+    //解除禁用
+    relieve(uid) {
+      this.axios.put('/relieveUser', `uid=${uid}`).then((result) => {
         if (result.data.code == 201) {
           this.$message.success('修改成功');
-          this.getGoods();
-        } else {
+          this.getUsers();
+        } else if (result.data.code == 202) {
+          this.$message.error('修改失败');
+        }
+      });
+    },
+    //禁用账户
+    banUser(uid) {
+      this.axios.put('/banUser', `uid=${uid}`).then((result) => {
+        if (result.data.code == 201) {
+          this.$message.success('修改成功');
+          this.getUsers();
+        } else if (result.data.code == 202) {
           this.$message.error('修改失败');
         }
       });

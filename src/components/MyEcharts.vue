@@ -25,8 +25,8 @@ export default {
     // 调用图表加载
     this.drawLine();
     // 开启定时器
-    // this.myUpdate = setInterval(() => this.update(), 10000);
-    // this.myAddUser = setInterval(() => this.drawLine(), 1000);
+    // this.myUpdate = setInterval(() => this.update(), 2000);
+    // this.myAddUser = setInterval(() => this.drawLine(), 2000);
   },
   beforeDestroy() {
     //销毁定时器
@@ -38,7 +38,7 @@ export default {
     update() {
       for (var i = 0; i < this.chartData.length; i++) {
         for (var t = 0; t < this.chartData[i].length; t++) {
-          this.chartData[i][t] += 10;
+          this.chartData[i][t] += 20;
         }
       }
     },

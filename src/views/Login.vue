@@ -81,7 +81,7 @@ export default {
           this.axios.post('/login', `account=${this.login_form.account}&password=${this.login_form.password}`).then((result) => {
             if (result.data.code == 200) {
               this.$message.success('登录成功');
-              //登录成功保存信息至Session
+              //登录成功:解析token并保存信息至localStorage
               const userObj = jwtDecode(result.data.token);
               userObj.checked = this.checked;
               localStorage.setItem('userInfo', JSON.stringify(userObj));

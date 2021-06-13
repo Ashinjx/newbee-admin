@@ -2,6 +2,12 @@
   <div class="myGoods">
     <!-- 卡片包裹 -->
     <el-card class="box-card">
+      <template #header>
+        <div>
+          <i v-if="hasBack" class="el-icon-back" @click="back"></i>
+          <span>{{ add ? '添加商品' : '修改商品' }}</span>
+        </div>
+      </template>
       <!-- 商品表单 -->
       <el-form :model="goodForm" :rules="rules" ref="goodForm" label-width="100px">
         <el-form-item label="商品分类" prop="classID">
@@ -55,6 +61,7 @@
           <div ref="editor"></div>
         </el-form-item>
         <el-form-item>
+          <!-- 提交按钮 -->
           <el-button @click="button('goodForm')" type="primary">{{ arr[3] ? '立即修改' : '立即创建' }}</el-button>
         </el-form-item>
       </el-form>
@@ -65,14 +72,15 @@
 @import './sass/myGoods.scss';
 </style>
 <script>
+// 引用富文本编辑器
 import E from 'wangeditor';
 export default {
   data() {
     return {
-      //通过路由判断当前是添加商品还是修改商品
-      arr: location.hash.split('/'),
-      // 下拉列表
-      options: [],
+      hasBack: true, //返回按钮
+      add: true, //添加商品
+      arr: location.hash.split('/'), //通过url信息判断当前是添加商品还是修改商品
+      options: [], // 下拉列表
       // 表单
       goodForm: {
         classID: '',
@@ -122,10 +130,10 @@ export default {
     //修改商品下获取单个商品
     getGood() {
       if (this.arr[3]) {
+        this.add = false;
         this.axios.get(`/getGoods/${this.arr[3]}`).then((result) => {
           if (result.data.code == 200) {
             this.goodForm = result.data.result[0];
-            console.log(this.goodForm);
           } else {
             this.$message.error('查询失败');
           }
@@ -139,7 +147,7 @@ export default {
       var isLt2M = file.size / 1024 / 1024 < 2;
 
       if (!isJPG) {
-        this.$message.error('商品主图只能是JPG格式!');
+        this.$message.error('商品主图只能是图片格式!');
       }
       if (!isLt2M) {
         this.$message.error('上传头像图片大小不能超过 2MB!');
@@ -154,7 +162,7 @@ export default {
       var formdata = new FormData();
       formdata.append('image', param.file);
       formdata.append('apiType', 'bilibili');
-      formdata.append('token', '60321ff9866f32132ff912849b19955d');
+      formdata.append('token', '6b86926c00dedc2ad9fc165082727d3e');
       //发送请求,上传至图床平台
       this.axios({
         url: 'https://www.hualigs.cn/api/upload',
@@ -203,7 +211,7 @@ export default {
                 if (result.data.code == 201) {
                   this.$message.success('修改成功');
                   this.$router.push('/admin/goodsAdmin'); //跳转商品管理
-                } else if (result.data.code == 201) {
+                } else if (result.data.code == 500) {
                   //code==500则说明数据库中已存在该分类
                   this.$message.error('修改失败');
                 }
@@ -213,6 +221,10 @@ export default {
           }
         });
       }
+    },
+    //后退
+    back() {
+      this.$router.back();
     },
   },
 };

@@ -9,13 +9,14 @@
           <span>新蜂后台</span>
         </div>
         <div class="line"></div>
-        <el-menu :router="true" background-color="#222832" text-color="#fff" active-text-color="#1baeae">
+        <!-- 下拉导航菜单 -->
+        <el-menu :router="true" :unique-opened="true" background-color="#222832" text-color="#fff" active-text-color="#1baeae">
           <el-submenu index="1">
             <template slot="title">
               <span>Dashboard</span>
             </template>
             <el-menu-item-group>
-              <el-menu-item index="/admin/dashboard" @click="eidtPath(1)">
+              <el-menu-item index="/admin/dashboard" @click="eidtPath('dashboard')">
                 <i class="el-icon-odometer"></i>
                 数据大盘
               </el-menu-item>
@@ -26,19 +27,19 @@
               <span>首页配置</span>
             </template>
             <el-menu-item-group>
-              <el-menu-item index="2-1" @click="eidtPath(4)">
+              <el-menu-item index="/admin/carousel" @click="eidtPath('carousel')">
                 <i class="el-icon-picture"></i>
                 轮播图配置
               </el-menu-item>
-              <el-menu-item index="2-2" @click="eidtPath(5)">
+              <el-menu-item index="/admin/hotSale" @click="eidtPath('hotSale')">
                 <i class="el-icon-star-on"></i>
                 热销商品配置
               </el-menu-item>
-              <el-menu-item index="2-3" @click="eidtPath(6)">
+              <el-menu-item index="/admin/newGood" @click="eidtPath('newGood')">
                 <i class="el-icon-sell"></i>
                 新品上线配置
               </el-menu-item>
-              <el-menu-item index="2-4" @click="eidtPath(7)">
+              <el-menu-item index="/admin/forYou" @click="eidtPath('forYou')">
                 <i class="el-icon-thumb"></i>
                 为你推荐配置
               </el-menu-item>
@@ -49,19 +50,19 @@
               <span>模块管理</span>
             </template>
             <el-menu-item-group>
-              <el-menu-item index="/admin/classify" @click="eidtPath(8)">
+              <el-menu-item index="/admin/classify" @click="eidtPath('classify')">
                 <i class="el-icon-menu"></i>
                 分类管理
               </el-menu-item>
-              <el-menu-item index="/admin/goodsAdmin" @click="eidtPath(9)">
+              <el-menu-item index="/admin/goodsAdmin" @click="eidtPath('goodsAdmin')">
                 <i class="el-icon-goods"></i>
                 商品管理
               </el-menu-item>
-              <el-menu-item index="3-3" @click="eidtPath(10)">
+              <el-menu-item index="/admin/userAdmin" @click="eidtPath('userAdmin')">
                 <i class="el-icon-user-solid"></i>
                 用户管理
               </el-menu-item>
-              <el-menu-item index="3-4" @click="eidtPath(11)">
+              <el-menu-item index="/admin/orderAdmin" @click="eidtPath('orderAdmin')">
                 <i class="el-icon-s-order"></i>
                 订单管理
               </el-menu-item>
@@ -72,7 +73,7 @@
               <span>系统管理</span>
             </template>
             <el-menu-item-group>
-              <el-menu-item index="4-1" @click="eidtPath(12)">
+              <el-menu-item index="/admin/updateInfo" @click="eidtPath('updateInfo')">
                 <i class="el-icon-lock"></i>
                 修改信息
               </el-menu-item>
@@ -84,6 +85,7 @@
         <!-- 头部信息栏 -->
         <el-header class="header">
           <div class="header_left">
+            <!-- 当前位置 -->
             <span>{{ path }}</span>
           </div>
           <div class="header_right">
@@ -95,6 +97,7 @@
                   <i class="el-icon-caret-bottom"></i>
                 </div>
               </template>
+              <!-- 弹出框 -->
               <div class="nickname">
                 <p>登录名：{{ user.account || '游客' }}</p>
                 <p>昵称：{{ user.nickname || '游客' }}</p>
@@ -103,8 +106,8 @@
             </el-popover>
           </div>
         </el-header>
-        <!-- 主体 -->
         <el-main>
+          <!-- 主体预留给子组件 -->
           <router-view></router-view>
         </el-main>
         <!-- 底部 -->
@@ -124,68 +127,31 @@
 @import './sass/admin.scss';
 </style>
 <script>
+import { mapState } from 'vuex';
 export default {
   data() {
     return {
-      path: '主页',
-      user: JSON.parse(localStorage.getItem('userInfo')),
+      pathName: location.hash.split('/')[2], //获取路由锚点
+      path: '主页', //默认为主页
+      user: JSON.parse(localStorage.getItem('userInfo')), //从localStorage获取管理员信息
     };
   },
   mounted() {
-    this.pathName();
+    this.getPathName();
+  },
+  computed: {
+    ...mapState(['pathMap']),
   },
   methods: {
     //路由跳转后更改title
-    eidtPath(val) {
-      if (val == 1) {
-        this.path = '数据大盘';
-      } else if (val == 2) {
-        this.path = '添加商品';
-      } else if (val == 3) {
-        this.path = '修改商品';
-      } else if (val == 4) {
-        this.path = '轮播图配置';
-      } else if (val == 5) {
-        this.path = '热销商品配置';
-      } else if (val == 6) {
-        this.path = '新品上线配置';
-      } else if (val == 7) {
-        this.path = '为你推荐配置';
-      } else if (val == 8) {
-        this.path = '分类管理';
-      } else if (val == 9) {
-        this.path = '商品管理';
-      } else if (val == 10) {
-        this.path = '用户管理';
-      } else if (val == 11) {
-        this.path = '订单管理';
-      } else if (val == 12) {
-        this.path = '修改管理';
-      }
+    eidtPath(pathMap) {
+      this.path = this.pathMap[pathMap];
     },
     //刷新页面后保持title
-    pathName() {
-      var endPath = location.hash.split('/');
-      if (endPath[2] == 'dashboard') {
-        this.path = '数据大盘';
-      } else if (endPath[2] == 'addGoods') {
-        this.path = '添加商品';
-      } else if (endPath[2] == 'editGoods') {
-        this.path = '修改商品';
-      } else if (endPath[2] == 'carousel') {
-        this.path = '轮播图配置';
-      } else if (endPath[2] == 'hotSale') {
-        this.path = '热销商品配置';
-      } else if (endPath[2] == 'newGoods') {
-        this.path = '新品上线配置';
-      } else if (endPath[2] == 'forYou') {
-        this.path = '为你推荐配置';
-      } else if (endPath[2] == 'classify') {
-        this.path = '分类管理';
-      } else if (endPath[2] == 'goodsAdmin') {
-        this.path = '商品管理';
-      }
+    getPathName() {
+      this.path = this.pathMap[this.pathName];
     },
+    //退出登录
     logout() {
       this.$router.push('/');
     },

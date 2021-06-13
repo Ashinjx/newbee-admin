@@ -20,11 +20,11 @@
         tooltip-effect="dark"
         style="width: 100%"
         @selection-change="handleSelectionChange"
-        :default-sort="{ prop: 'sortValue', order: 'descending' }"
+        @sort-change="sortChange"
       >
         <el-table-column type="selection" width="55"> </el-table-column>
         <el-table-column prop="className" label="分类名称"> </el-table-column>
-        <el-table-column prop="sortValue" label="排序值" width="120"> </el-table-column>
+        <el-table-column prop="sortValue" label="排序值" sortable="custom" width="120"> </el-table-column>
         <el-table-column prop="createTime" label="添加时间" width="200"> </el-table-column>
         <el-table-column label="操作" width="220">
           <!-- 操作按钮 修改/下级分类/删除 -->
@@ -64,7 +64,7 @@
   </div>
 </template>
 <style lang="scss" scoped>
-@import './sass/classify.scss';
+@import './sass/module.scss';
 </style>
 <script>
 export default {
@@ -103,6 +103,27 @@ export default {
         this.total = this.tableData.length;
       });
     },
+    //表格排序
+    sortChange({ prop, order }) {
+      this.tableData.sort(this.compare(prop, order));
+    },
+    //自定义排序规则
+    compare(propertyName, sort) {
+      return function(obj1, obj2) {
+        var value1 = obj1[propertyName];
+        var value2 = obj2[propertyName];
+        if (typeof value1 === 'string' && typeof value2 === 'string') {
+          const res = value1.localeCompare(value2, 'zh');
+          return sort === 'ascending' ? res : -res;
+        } else {
+          if (value1 <= value2) {
+            return sort === 'ascending' ? -1 : 1;
+          } else if (value1 > value2) {
+            return sort === 'ascending' ? 1 : -1;
+          }
+        }
+      };
+    },
     //控制分页
     currentChange(currentPage) {
       this.currentPage = currentPage;
@@ -127,7 +148,7 @@ export default {
       //将行数据解构到表单对象中(避免引用同一地址)
       this.handleForm = { ...row };
     },
-    //选中列
+    //获取选中列classID
     handleSelectionChange(val) {
       this.multipleSelection = [];
       for (var i = 0; i < val.length; i++) {
@@ -137,15 +158,18 @@ export default {
     },
     //删除分类
     deleteClassify(...classID) {
-      this.axios.delete(`/deleteClassify/${classID}`).then((result) => {
-        if (result.data.code == 1) {
-          this.$message.success('删除成功');
-          // 重新载入分类表格
-          this.getClassify();
-        } else {
-          this.$message.error('删除失败');
-        }
-      });
+      this.axios
+        .delete(`/deleteClassify/${classID}`)
+        .then((result) => {
+          if (result.data.code == 1) {
+            this.$message.success('删除成功');
+            // 重新载入分类表格
+            this.getClassify();
+          } else {
+            this.$message.error('删除失败');
+          }
+        })
+        .catch((err) => console.log(err));
     },
     //发送请求
     send() {
