@@ -10,13 +10,13 @@
       </template>
       <!-- 商品表单 -->
       <el-form :model="goodForm" :rules="rules" ref="goodForm" label-width="100px">
-        <el-form-item label="商品分类" prop="classID">
-          <el-select clearable v-model="goodForm.classID" placeholder="请选择分类">
-            <el-option v-for="(i, k) of options" :key="k" :label="options[k].label" :value="options[k].value" style="width: 300px"></el-option>
-          </el-select>
-        </el-form-item>
         <el-form-item label="商品名称" prop="name">
           <el-input v-model="goodForm.name" placeholder="请输入商品名称"></el-input>
+        </el-form-item>
+        <el-form-item label="商品分类" prop="classID">
+          <el-select clearable v-model="goodForm.classID" placeholder="请选择分类" :popper-append-to-body="false">
+            <el-option v-for="(i, k) of options" :key="k" :label="options[k].label" :value="options[k].value" style="width: 300px"></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="商品简介" prop="intr">
           <el-input type="textarea" v-model="goodForm.intr" placeholder="请输入商品简介(100字以内)"></el-input>

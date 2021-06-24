@@ -15,6 +15,7 @@
       </template>
       <!-- 主体表格 -->
       <el-table
+        v-loading="loading"
         ref="multipleTable"
         :data="tableData.slice((currentPage - 1) * pageSize, currentPage * pageSize)"
         tooltip-effect="dark"
@@ -67,7 +68,7 @@
             :http-request="uploadImg"
           >
             <!-- 预览图 -->
-            <img style="width:200px;height:100px;border: 1px solid #e9e9e9" v-if="carouselForm.imageUrl" :src="carouselForm.imageUrl" class="avatar" />
+            <img style="width:100px;height:100px;border: 1px solid #e9e9e9" v-if="carouselForm.imageUrl" :src="carouselForm.imageUrl" class="avatar" />
             <!-- 未上传 -->
             <i v-else class="el-icon-plus avatar-uploader-icon"></i>
           </el-upload>
@@ -95,6 +96,7 @@
 export default {
   data() {
     return {
+      loading: true,
       tableData: [], // 存放表格数据
       total: 0, //数据总条数
       pageSize: 10, //每页显示
@@ -134,6 +136,7 @@ export default {
           this.tableData = [];
           this.$message.error('暂无数据');
         }
+        this.loading = false;
       });
     },
     //表格排序

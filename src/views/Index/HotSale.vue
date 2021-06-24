@@ -15,6 +15,7 @@
       </template>
       <!-- 主体表格 -->
       <el-table
+        v-loading="loading"
         ref="multipleTable"
         :data="tableData.slice((currentPage - 1) * pageSize, currentPage * pageSize)"
         tooltip-effect="dark"
@@ -78,6 +79,7 @@
 export default {
   data() {
     return {
+      loading: true,
       tableData: [], // 存放表格数据
       total: 0, //数据总条数
       pageSize: 10, //每页显示
@@ -115,6 +117,7 @@ export default {
           this.tableData = [];
           this.$message.error('暂无数据');
         }
+        this.loading = false;
       });
     },
     //表格排序

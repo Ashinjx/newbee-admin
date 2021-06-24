@@ -67,9 +67,21 @@ export default {
   data() {
     return {
       order: 1888, // 订单量
+      myOrder: '', //订单量定时器
       today: 36271, //日活
+      myToday: '', //日活定时器
       conversion: '20%', //转化率
     };
+  },
+  mounted() {
+    //开启定时器
+    this.myOrder = setInterval(() => (this.order += 2), 2000);
+    this.myToday = setInterval(() => (this.today += 15), 2000);
+  },
+  beforeDestroy() {
+    //销毁定时器
+    clearInterval(this.myOrder);
+    clearInterval(this.myToday);
   },
 };
 </script>

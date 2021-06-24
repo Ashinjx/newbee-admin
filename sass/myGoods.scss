@@ -45,6 +45,11 @@ $newbeeColor:#1baeae;
         .el-input.is-focus .el-input__inner {
           border-color: $newbeeColor;
         }
+
+        .el-select-dropdown__item.selected {
+          color: $newbeeColor;
+          font-weight: 700;
+        }
       }
 
       //输入框,多行文本域

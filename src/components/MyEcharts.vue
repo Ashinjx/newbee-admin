@@ -6,6 +6,8 @@
 export default {
   data() {
     return {
+      // 图表容器
+      myChartEle: null,
       // 保存图表中的数据
       chartData: [
         [120, 132, 101, 134, 90, 230, 210],
@@ -22,11 +24,13 @@ export default {
   mounted() {
     // 调用数据更新
     this.update();
+    // 基于准备好的dom，初始化echarts实例
+    this.myChartEle = this.echarts.init(document.getElementById('myChart'));
     // 调用图表加载
     this.drawLine();
     // 开启定时器
-    // this.myUpdate = setInterval(() => this.update(), 2000);
-    // this.myAddUser = setInterval(() => this.drawLine(), 2000);
+    this.myUpdate = setInterval(() => this.update(), 2000);
+    this.myAddUser = setInterval(() => this.drawLine(), 2000);
   },
   beforeDestroy() {
     //销毁定时器
@@ -36,16 +40,12 @@ export default {
   methods: {
     // 模拟更新图表数据
     update() {
-      for (var i = 0; i < this.chartData.length; i++) {
-        for (var t = 0; t < this.chartData[i].length; t++) {
-          this.chartData[i][t] += 20;
-        }
+      for (var item of this.chartData) {
+        item[item.length - 1] += 20;
       }
     },
     // 加载图表
     drawLine() {
-      // 基于准备好的dom，初始化echarts实例
-      var myChart = this.echarts.init(document.getElementById('myChart'));
       // 绘制图表
       var option = {
         title: {
@@ -145,7 +145,7 @@ export default {
           },
         ],
       };
-      option && myChart.setOption(option);
+      option && this.myChartEle.setOption(option);
     },
   },
 };

@@ -16,6 +16,7 @@
       </template>
       <!-- 主体表格 -->
       <el-table
+        v-loading="loading"
         ref="multipleTable"
         :data="tableData.slice((currentPage - 1) * pageSize, currentPage * pageSize)"
         tooltip-effect="dark"
@@ -72,6 +73,7 @@
 export default {
   data() {
     return {
+      loading: true,
       orderSelect: '', //搜索
       orderStatus: '', //订单状态
       //单选列表
@@ -173,6 +175,7 @@ export default {
           this.tableData2 = [];
           this.$message.error('暂无数据');
         }
+        this.loading = false;
       });
     },
     //查询数据

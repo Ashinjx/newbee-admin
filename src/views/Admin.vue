@@ -113,7 +113,7 @@
         <!-- 底部 -->
         <el-footer class="footer">
           <div class="left">
-            <p>Ashin</p>
+            <p>{{ time }}</p>
           </div>
           <div class="right">
             <el-link href="https://github.com/Ashinjx/newbee-admin.git" target="_blank">Github</el-link>
@@ -133,15 +133,34 @@ export default {
     return {
       pathName: location.hash.split('/')[2], //获取路由锚点
       path: '主页', //默认为主页
-      user: JSON.parse(localStorage.getItem('userInfo')), //从localStorage获取管理员信息
+      user: JSON.parse(localStorage.getItem('userInfo')) || {}, //从localStorage获取管理员信息
+      time: '', //当前时间
+      week: ['日', '一', '二', '三', '四', '五', '六'], //保存星期
+      myTime: '', //刷新时间
     };
   },
   mounted() {
+    //判断是否登录
+    if (!this.user.account) {
+      //未登录则返回登录页
+      this.$router.push('/');
+      this.$message.error('管理员未登录');
+    }
+    //获取当前路由
     this.getPathName();
+    //获取时间
+    this.getTime();
+    //开启定时器每秒刷新时间
+    this.myTime = setInterval(() => this.getTime(), 1000);
+  },
+  beforeDestroy() {
+    //销毁定时器
+    clearInterval(this.myTime);
   },
   computed: {
     ...mapState(['pathMap']),
   },
+
   methods: {
     //路由跳转后更改title
     eidtPath(pathMap) {
@@ -154,6 +173,25 @@ export default {
     //退出登录
     logout() {
       this.$router.push('/');
+    },
+    //获取时间
+    getTime() {
+      var year = new Date().getFullYear();
+      var month = new Date().getMonth() + 1;
+      var date = new Date().getDate();
+      var hour = new Date().getHours();
+      var minute = new Date().getMinutes();
+      var day = new Date().getDay();
+      if (month < 10) {
+        month = '0' + month;
+      }
+      if (hour < 10) {
+        hour = '0' + hour;
+      }
+      if (minute < 10) {
+        minute = '0' + minute;
+      }
+      this.time = `${year}年${month}月${date}日  ${hour}时${minute}分  星期${this.week[day]}`;
     },
   },
 };

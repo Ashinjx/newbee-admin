@@ -62,14 +62,15 @@ export default {
     //读取cookie中登录信息
     getUserInfo() {
       var user = JSON.parse(localStorage.getItem('userInfo'));
-      console.log(user.checked);
-      if (user.checked == true) {
-        this.login_form.account = user.account;
-        this.login_form.password = user.password;
-        this.checked = true;
-      }
-      if (user.checked == false) {
-        this.checked = false;
+      if (user != null) {
+        if (user.checked == true) {
+          this.login_form.account = user.account;
+          this.login_form.password = user.password;
+          this.checked = true;
+        }
+        if (user.checked == false) {
+          this.checked = false;
+        }
       }
     },
     //登录
