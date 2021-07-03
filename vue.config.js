@@ -5,7 +5,7 @@ module.exports = {
     hot: true, //自动保存
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:3000/newbee',
+        target: 'http://127.0.0.1:3030/newbee',
         ws: true,
         changeOrigin: true,
         pathRewrite: { '^/api': '' },

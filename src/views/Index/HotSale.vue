@@ -34,11 +34,11 @@
         <el-table-column prop="goodID" label="商品编号" width="200"> </el-table-column>
         <el-table-column prop="createTime" label="添加时间" width="200"> </el-table-column>
         <el-table-column label="操作" width="100">
-          <!-- 操作按钮 修改/下级分类/删除 -->
+          <!-- 操作按钮 修改/删除 -->
           <template #default="scope">
             <a style="cursor: pointer; margin-right: 10px;color: #409eff" @click="editHotSale(scope.row)">修改</a>
             <!-- 确认删除后触发删除请求 -->
-            <el-popconfirm title="确定删除吗？" @confirm="deleteHotSale(scope.row.goodID)">
+            <el-popconfirm title="确定删除吗？" @confirm="deleteHotSale(scope.row.hotID)">
               <template #reference>
                 <a style="cursor: pointer;color: #409eff">删除</a>
               </template>
@@ -53,8 +53,10 @@
     <!-- 添加/修改热销商品对话框-->
     <el-dialog :title="type == 'add' ? '添加商品' : '修改商品'" :visible="visible" width="400px">
       <el-form :model="hotSaleForm" :rules="rules" label-width="100px" ref="hotSaleForm" class="good-form">
-        <el-form-item label="商品名称" prop="goodName">
-          <el-input type="text" v-model="hotSaleForm.goodName"></el-input>
+        <el-form-item label="商品名称" prop="goodID">
+          <el-select clearable v-model="hotSaleForm.goodID" placeholder="请选择商品" :popper-append-to-body="false">
+            <el-option v-for="(i, k) of options" :key="k" :label="options[k].label" :value="options[k].value" style="width: 300px"></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="跳转链接" prop="jumpUrl">
           <el-input type="text" v-model="hotSaleForm.jumpUrl"></el-input>
@@ -87,6 +89,7 @@ export default {
       visible: false, //控制对话框隐藏
       type: 'add', //控制对话框title
       hotSaleForm: {}, //对话框表单
+      options: [], //下拉列表
       rules: {
         //对话框表单验证
         goodName: [{ required: 'true', message: '名称不能为空', trigger: ['change'] }],
@@ -98,8 +101,23 @@ export default {
   mounted() {
     //调用函数获取表格数据
     this.getHotSale();
+    // 获取商品option
+    this.getOptions();
   },
   methods: {
+    // 获取商品option
+    getOptions() {
+      this.axios.get('/getGood/options').then((result) => {
+        if (result.data.code == 200) {
+          for (var i = 0; i < result.data.result.length; i++) {
+            this.options[i] = {
+              value: result.data.result[i].goodID,
+              label: result.data.result[i].name,
+            };
+          }
+        }
+      });
+    },
     //获取商品列表
     getHotSale() {
       this.axios.get('/getHotSale').then((result) => {
@@ -107,7 +125,6 @@ export default {
           for (var i = 0; i < result.data.result.length; i++) {
             //将数据库返回的时间转换为人看的时间
             result.data.result[i].createTime = this.moment(result.data.result[i].createTime).format('YYYY-MM-DD HH:mm:ss');
-            console.log();
           }
           //存放到表格中
           this.tableData = result.data.result;
@@ -169,13 +186,13 @@ export default {
     handleSelectionChange(val) {
       this.multipleSelection = [];
       for (var i = 0; i < val.length; i++) {
-        this.multipleSelection[i] = val[i].goodID;
+        this.multipleSelection[i] = val[i].hotID;
       }
     },
     //删除商品
-    deleteHotSale(...goodID) {
+    deleteHotSale(...hotID) {
       this.axios
-        .delete(`/deleteHotSale/${goodID}`)
+        .delete(`/deleteHotSale/${hotID}`)
         .then((result) => {
           if (result.data.code == 1) {
             this.$message.success('删除成功');
@@ -193,10 +210,10 @@ export default {
       this.$refs[hotSaleForm].validate((valid) => {
         if (valid) {
           // 如果没有传入ID, 则判断为添加;
-          if (this.hotSaleForm.goodID == '') {
+          if (this.hotSaleForm.hotID == undefined) {
             // 发送添加请求;
             this.axios
-              .post(`/addHotSale`, `goodName=${this.hotSaleForm.goodName}&jumpUrl=${this.hotSaleForm.jumpUrl}&sortValue=${this.hotSaleForm.sortValue}`)
+              .post(`/addHotSale`, `goodID=${this.hotSaleForm.goodID}&jumpUrl=${this.hotSaleForm.jumpUrl}&sortValue=${this.hotSaleForm.sortValue}`)
               .then((result) => {
                 if (result.data.code == 201) {
                   this.$message.success('添加成功');
@@ -209,12 +226,12 @@ export default {
                 }
               })
               .catch((err) => console.log(err));
-          } else if (this.hotSaleForm.goodID != '') {
+          } else if (this.hotSaleForm.hotID != undefined) {
             // 发送修改请求;
             this.axios
               .put(
                 `/editHotSale`,
-                `goodName=${this.hotSaleForm.goodName}&jumpUrl=${this.hotSaleForm.jumpUrl}&sortValue=${this.hotSaleForm.sortValue}&goodID=${this.hotSaleForm.goodID}`
+                `goodID=${this.hotSaleForm.goodID}&jumpUrl=${this.hotSaleForm.jumpUrl}&sortValue=${this.hotSaleForm.sortValue}&hotID=${this.hotSaleForm.hotID}`
               )
               .then((result) => {
                 if (result.data.code == 201) {

@@ -34,11 +34,11 @@
         <el-table-column prop="goodID" label="商品编号" width="200"> </el-table-column>
         <el-table-column prop="createTime" label="添加时间" width="200"> </el-table-column>
         <el-table-column label="操作" width="100">
-          <!-- 操作按钮 修改/下级分类/删除 -->
+          <!-- 操作按钮 修改/删除 -->
           <template #default="scope">
             <a style="cursor: pointer; margin-right: 10px;color: #409eff" @click="editNewGood(scope.row)">修改</a>
             <!-- 确认删除后触发删除请求 -->
-            <el-popconfirm title="确定删除吗？" @confirm="deleteNewGood(scope.row.goodID)">
+            <el-popconfirm title="确定删除吗？" @confirm="deleteNewGood(scope.row.newID)">
               <template #reference>
                 <a style="cursor: pointer;color: #409eff">删除</a>
               </template>
@@ -50,11 +50,13 @@
       <el-pagination background layout="prev, pager, next" :total="total" :page-size="pageSize" :current-page="currentPage" @current-change="currentChange">
       </el-pagination>
     </el-card>
-    <!-- 添加/修改商品对话框-->
+    <!-- 添加/修改商品对话框(待修改)-->
     <el-dialog :title="type == 'add' ? '添加商品' : '修改商品'" :visible="visible" width="400px">
       <el-form :model="newGoodForm" :rules="rules" label-width="100px" ref="newGoodForm" class="good-form">
-        <el-form-item label="商品名称" prop="goodName">
-          <el-input type="text" v-model="newGoodForm.goodName"></el-input>
+        <el-form-item label="商品名称" prop="goodID">
+          <el-select clearable v-model="newGoodForm.goodID" placeholder="请选择商品" :popper-append-to-body="false">
+            <el-option v-for="(i, k) of options" :key="k" :label="options[k].label" :value="options[k].value" style="width: 300px"></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="跳转链接" prop="jumpUrl">
           <el-input type="text" v-model="newGoodForm.jumpUrl"></el-input>
@@ -87,6 +89,7 @@ export default {
       visible: false, //控制对话框隐藏
       type: 'add', //控制对话框title
       newGoodForm: {}, //对话框表单
+      options: [], //选择框
       rules: {
         //对话框表单验证
         goodName: [{ required: 'true', message: '名称不能为空', trigger: ['change'] }],
@@ -98,8 +101,23 @@ export default {
   mounted() {
     //调用函数获取表格数据
     this.getNewGood();
+    // 获取商品option
+    this.getOptions();
   },
   methods: {
+    // 获取商品option
+    getOptions() {
+      this.axios.get('/getGood/options').then((result) => {
+        if (result.data.code == 200) {
+          for (var i = 0; i < result.data.result.length; i++) {
+            this.options[i] = {
+              value: result.data.result[i].goodID,
+              label: result.data.result[i].name,
+            };
+          }
+        }
+      });
+    },
     //获取商品列表
     getNewGood() {
       this.axios.get('/getNewGood').then((result) => {
@@ -107,7 +125,6 @@ export default {
           for (var i = 0; i < result.data.result.length; i++) {
             //将数据库返回的时间转换为人看的时间
             result.data.result[i].createTime = this.moment(result.data.result[i].createTime).format('YYYY-MM-DD HH:mm:ss');
-            console.log();
           }
           //存放到表格中
           this.tableData = result.data.result;
@@ -169,13 +186,13 @@ export default {
     handleSelectionChange(val) {
       this.multipleSelection = [];
       for (var i = 0; i < val.length; i++) {
-        this.multipleSelection[i] = val[i].goodID;
+        this.multipleSelection[i] = val[i].newID;
       }
     },
     //删除商品
-    deleteNewGood(...goodID) {
+    deleteNewGood(...newID) {
       this.axios
-        .delete(`/deleteNewGood/${goodID}`)
+        .delete(`/deleteNewGood/${newID}`)
         .then((result) => {
           if (result.data.code == 1) {
             this.$message.success('删除成功');
@@ -193,10 +210,10 @@ export default {
       this.$refs[newGoodForm].validate((valid) => {
         if (valid) {
           // 如果没有传入ID, 则判断为添加;
-          if (this.newGoodForm.goodID == '') {
+          if (this.newGoodForm.newID == undefined) {
             // 发送添加请求;
             this.axios
-              .post(`/addNewGood`, `goodName=${this.newGoodForm.goodName}&jumpUrl=${this.newGoodForm.jumpUrl}&sortValue=${this.newGoodForm.sortValue}`)
+              .post(`/addNewGood`, `goodID=${this.newGoodForm.goodID}&jumpUrl=${this.newGoodForm.jumpUrl}&sortValue=${this.newGoodForm.sortValue}`)
               .then((result) => {
                 if (result.data.code == 201) {
                   this.$message.success('添加成功');
@@ -209,12 +226,12 @@ export default {
                 }
               })
               .catch((err) => console.log(err));
-          } else if (this.newGoodForm.goodID != '') {
+          } else if (this.newGoodForm.newID) {
             // 发送修改请求;
             this.axios
               .put(
                 `/editNewGood`,
-                `goodName=${this.newGoodForm.goodName}&jumpUrl=${this.newGoodForm.jumpUrl}&sortValue=${this.newGoodForm.sortValue}&goodID=${this.newGoodForm.goodID}`
+                `goodID=${this.newGoodForm.goodID}&jumpUrl=${this.newGoodForm.jumpUrl}&sortValue=${this.newGoodForm.sortValue}&newID=${this.newGoodForm.newID}`
               )
               .then((result) => {
                 console.log(result);

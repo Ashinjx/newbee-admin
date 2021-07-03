@@ -38,7 +38,7 @@
           <template #default="scope">
             <a style="cursor: pointer; margin-right: 10px;color: #409eff" @click="editForYou(scope.row)">修改</a>
             <!-- 确认删除后触发删除请求 -->
-            <el-popconfirm title="确定删除吗？" @confirm="deleteForYou(scope.row.goodID)">
+            <el-popconfirm title="确定删除吗？" @confirm="deleteForYou(scope.row.groomID)">
               <template #reference>
                 <a style="cursor: pointer;color: #409eff">删除</a>
               </template>
@@ -53,8 +53,10 @@
     <!-- 添加/修改商品对话框-->
     <el-dialog :title="type == 'add' ? '添加商品' : '修改商品'" :visible="visible" width="400px">
       <el-form :model="forYouForm" :rules="rules" label-width="100px" ref="forYouForm" class="good-form">
-        <el-form-item label="商品名称" prop="goodName">
-          <el-input type="text" v-model="forYouForm.goodName"></el-input>
+        <el-form-item label="商品名称" prop="goodID">
+          <el-select clearable v-model="forYouForm.goodID" placeholder="请选择商品" :popper-append-to-body="false">
+            <el-option v-for="(i, k) of options" :key="k" :label="options[k].label" :value="options[k].value" style="width: 300px"></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="跳转链接" prop="jumpUrl">
           <el-input type="text" v-model="forYouForm.jumpUrl"></el-input>
@@ -87,6 +89,7 @@ export default {
       visible: false, //控制对话框隐藏
       type: 'add', //控制对话框title
       forYouForm: {}, //对话框表单
+      options: [], //下拉列表
       rules: {
         //对话框表单验证
         goodName: [{ required: 'true', message: '名称不能为空', trigger: ['change'] }],
@@ -98,11 +101,26 @@ export default {
   mounted() {
     //调用函数获取表格数据
     this.getForYou();
+    // 获取商品option
+    this.getOptions();
   },
   methods: {
+    // 获取商品option
+    getOptions() {
+      this.axios.get('/getGood/options').then((result) => {
+        if (result.data.code == 200) {
+          for (var i = 0; i < result.data.result.length; i++) {
+            this.options[i] = {
+              value: result.data.result[i].goodID,
+              label: result.data.result[i].name,
+            };
+          }
+        }
+      });
+    },
     //获取商品列表
     getForYou() {
-      this.axios.get('/getForYou').then((result) => {
+      this.axios.get('/getGroom').then((result) => {
         if (result.data.code == 200) {
           for (var i = 0; i < result.data.result.length; i++) {
             //将数据库返回的时间转换为人看的时间
@@ -169,13 +187,13 @@ export default {
     handleSelectionChange(val) {
       this.multipleSelection = [];
       for (var i = 0; i < val.length; i++) {
-        this.multipleSelection[i] = val[i].goodID;
+        this.multipleSelection[i] = val[i].groomID;
       }
     },
     //删除商品
-    deleteForYou(...goodID) {
+    deleteForYou(...groomID) {
       this.axios
-        .delete(`/deleteForYou/${goodID}`)
+        .delete(`/deleteGroom/${groomID}`)
         .then((result) => {
           if (result.data.code == 1) {
             this.$message.success('删除成功');
@@ -193,10 +211,10 @@ export default {
       this.$refs[forYouForm].validate((valid) => {
         if (valid) {
           // 如果没有传入ID, 则判断为添加;
-          if (this.forYouForm.goodID == '') {
+          if (this.forYouForm.groomID == undefined) {
             // 发送添加请求;
             this.axios
-              .post(`/addForYou`, `goodName=${this.forYouForm.goodName}&jumpUrl=${this.forYouForm.jumpUrl}&sortValue=${this.forYouForm.sortValue}`)
+              .post(`/addGroom`, `goodID=${this.forYouForm.goodID}&jumpUrl=${this.forYouForm.jumpUrl}&sortValue=${this.forYouForm.sortValue}`)
               .then((result) => {
                 if (result.data.code == 201) {
                   this.$message.success('添加成功');
@@ -209,12 +227,12 @@ export default {
                 }
               })
               .catch((err) => console.log(err));
-          } else if (this.forYouForm.goodID != '') {
+          } else if (this.forYouForm.groomID != undefined) {
             // 发送修改请求;
             this.axios
               .put(
-                `/editForYou`,
-                `goodName=${this.forYouForm.goodName}&jumpUrl=${this.forYouForm.jumpUrl}&sortValue=${this.forYouForm.sortValue}&goodID=${this.forYouForm.goodID}`
+                `/editGroom`,
+                `goodID=${this.forYouForm.goodID}&jumpUrl=${this.forYouForm.jumpUrl}&sortValue=${this.forYouForm.sortValue}&groomID=${this.forYouForm.groomID}`
               )
               .then((result) => {
                 console.log(result);
